@@ -1,16 +1,20 @@
-# EAST: An Efficient and Accurate Scene Text Detector
+# Detection of seven segment fonts on electricity meeter display
 
 ### Introduction
 This is a fine tuned tensorflow model to detect seven segment text, using [EAST text detection](https://github.com/argman/EAST)
 The features are summarized blow:
 
 ### Contents
-1. [Installation](#installation)
-2. [Download](#download)
-2. [Demo](#demo)
-3. [Test](#train)
-4. [Train](#test)
-5. [Examples](#examples)
+- [](#)
+    - [Introduction](#introduction)
+    - [Contents](#contents)
+    - [Installation](#installation)
+    - [Download](#download)
+    - [Train](#train)
+    - [Demo](#demo)
+    - [Test](#test)
+    - [Examples](#examples)
+    - [Troubleshooting](#troubleshooting)
 
 ### Installation
 1. Any version of tensorflow version > 1.0 should be ok.
