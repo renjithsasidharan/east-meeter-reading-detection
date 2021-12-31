@@ -106,6 +106,7 @@ def check_and_validate_polys(polys, tags, xxx_todo_changeme):
             continue
         if p_area > 0:
             print('poly in wrong direction')
+            print(poly)
             poly = poly[(0, 3, 2, 1), :]
         validated_polys.append(poly)
         validated_tags.append(tag)

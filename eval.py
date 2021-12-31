@@ -8,10 +8,10 @@ import tensorflow as tf
 import locality_aware_nms as nms_locality
 import lanms
 
-tf.app.flags.DEFINE_string('test_data_path', '/tmp/ch4_test_images/images/', '')
+tf.app.flags.DEFINE_string('test_data_path', 'tmp/images/', '')
 tf.app.flags.DEFINE_string('gpu_list', '0', '')
-tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/east_icdar2015_resnet_v1_50_rbox/', '')
-tf.app.flags.DEFINE_string('output_dir', '/tmp/ch4_test_images/images/', '')
+tf.app.flags.DEFINE_string('checkpoint_path', 'tmp/east_icdar2015_resnet_v1_50_rbox/', '')
+tf.app.flags.DEFINE_string('output_dir', 'tmp/eval/', '')
 tf.app.flags.DEFINE_bool('no_write_images', False, 'do not write images')
 
 import model
@@ -148,15 +148,41 @@ def main(argv=None):
             print('Restore from {}'.format(model_path))
             saver.restore(sess, model_path)
 
+            # frozen graph
+            # output_graph = "frozen_model.pb"
+            # output_graph_def = tf.graph_util.convert_variables_to_constants(
+            #     sess,
+            #     tf.get_default_graph().as_graph_def(),
+            #     ["feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"])
+
+            # with tf.gfile.GFile(output_graph, "wb") as f:
+            #     f.write(output_graph_def.SerializeToString())
+            # frozen graph
+
+            interpreter = tf.lite.Interpreter(model_path=str('east_model_fp16.tflite'))
+            interpreter.allocate_tensors()
+
+            input_index = interpreter.get_input_details()[0]["index"]
+            output_index_1 = interpreter.get_output_details()[0]["index"]
+            output_index_2 = interpreter.get_output_details()[1]["index"]
+
             im_fn_list = get_images()
             for im_fn in im_fn_list:
                 im = cv2.imread(im_fn)[:, :, ::-1]
                 start_time = time.time()
                 im_resized, (ratio_h, ratio_w) = resize_image(im)
 
+                # timer = {'net': 0, 'restore': 0, 'nms': 0}
+                # start = time.time()
+                # score, geometry = sess.run([f_score, f_geometry], feed_dict={input_images: [im_resized]})
+                # timer['net'] = time.time() - start
+                
                 timer = {'net': 0, 'restore': 0, 'nms': 0}
                 start = time.time()
-                score, geometry = sess.run([f_score, f_geometry], feed_dict={input_images: [im_resized]})
+                interpreter.set_tensor(input_index, im_resized[np.newaxis, :, :, :].astype(np.float32))
+                interpreter.invoke()
+                score = interpreter.get_tensor(output_index_1)
+                geometry = interpreter.get_tensor(output_index_2)
                 timer['net'] = time.time() - start
 
                 boxes, timer = detect(score_map=score, geo_map=geometry, timer=timer)
