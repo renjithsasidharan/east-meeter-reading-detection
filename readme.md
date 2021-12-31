@@ -60,7 +60,7 @@ a text file will be then written to the output path.
 
 
 ### Examples
-Here are some test examples on icdar2015, enjoy the beautiful text boxes!
+Here are some test examples!
 ![image_1](demo_images/eval/02082021F5R80QMR162130605.jpeg)
 ![image_2](demo_images/eval/02082021F5R80QMR162130645.jpeg)
 ![image_3](demo_images/eval/02082021F5R80QMR162142118.jpeg)
@@ -70,5 +70,3 @@ Here are some test examples on icdar2015, enjoy the beautiful text boxes!
 ### Troubleshooting
 + How to compile lanms on Windows ?
   + See https://github.com/argman/EAST/issues/120
-
-Please let me know if you encounter any issues(my email boostczc@gmail dot com).
