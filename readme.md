@@ -1,35 +1,8 @@
 # EAST: An Efficient and Accurate Scene Text Detector
 
 ### Introduction
-This is a tensorflow re-implementation of [EAST: An Efficient and Accurate Scene Text Detector](https://arxiv.org/abs/1704.03155v2).
+This is a fine tuned tensorflow model to detect seven segment text, using [EAST text detection](https://github.com/argman/EAST)
 The features are summarized blow:
-+ Online demo
-	+ http://east.zxytim.com/
-	+ Result example: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e0703e
-	+ CAVEAT: There's only one cpu core on the demo server. Simultaneous access will degrade response time.
-+ Only **RBOX** part is implemented.
-+ A fast Locality-Aware NMS in C++ provided by the paper's author.
-+ The pre-trained model provided achieves **80.83** F1-score on ICDAR 2015
-	Incidental Scene Text Detection Challenge using only training images from ICDAR 2015 and 2013.
-  see [here](http://rrc.cvc.uab.es/?ch=4&com=evaluation&view=method_samples&task=1&m=29855&gtv=1) for the detailed results.
-+ Differences from original paper
-	+ Use ResNet-50 rather than PVANET
-	+ Use dice loss (optimize IoU of segmentation) rather than balanced cross entropy
-	+ Use linear learning rate decay rather than staged learning rate decay
-+ Speed on 720p (resolution of 1280x720) images:
-	+ Now
-		+ Graphic card: GTX 1080 Ti
-		+ Network fprop: **~50 ms**
-		+ NMS (C++): **~6ms**
-		+ Overall: **~16 fps**
-	+ Then
-		+ Graphic card: K40
-		+ Network fprop: ~150 ms
-		+ NMS (python): ~300ms
-		+ Overall: ~2 fps
-
-Thanks for the author's ([@zxytim](https://github.com/zxytim)) help!
-Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this useful.
 
 ### Contents
 1. [Installation](#installation)
@@ -71,9 +44,6 @@ Something like `?r=49647854-7ac2-11e7-8bb7-80000210fe80` appends and that makes 
 As long as you are not deleting data in `static/results`, you can share your results to your friends using
 the same URL.
 
-URL for example below: http://east.zxytim.com/?r=48e5020a-7b7f-11e7-b776-f23c91e0703e
-![web-demo](demo_images/web-demo.png)
-
 
 ### Test
 run
@@ -87,11 +57,11 @@ a text file will be then written to the output path.
 
 ### Examples
 Here are some test examples on icdar2015, enjoy the beautiful text boxes!
-![image_1](demo_images/img_2.jpg)
-![image_2](demo_images/img_10.jpg)
-![image_3](demo_images/img_14.jpg)
-![image_4](demo_images/img_26.jpg)
-![image_5](demo_images/img_75.jpg)
+![image_1](demo_images/eval/02082021F5R80QMR162130605.jpeg)
+![image_2](demo_images/eval/02082021F5R80QMR162130645.jpeg)
+![image_3](demo_images/eval/02082021F5R80QMR162142118.jpeg)
+![image_4](demo_images/eval/03082021F5R12QMR162036926.jpeg)
+![image_5](demo_images/eval/03082021F5R12QMR501215115.jpeg)
 
 ### Troubleshooting
 + How to compile lanms on Windows ?
