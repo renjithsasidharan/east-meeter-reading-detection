@@ -16,4 +16,4 @@ CXX_SOURCES = adaptor.cpp include/clipper/clipper.cpp
 LIB_SO = adaptor.so
 
 $(LIB_SO): $(CXX_SOURCES) $(DEPS)
-	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(CXX_SOURCES) --shared -fPIC
+	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(CXX_SOURCES) --shared -fPIC 
