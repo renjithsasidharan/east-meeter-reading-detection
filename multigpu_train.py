@@ -15,6 +15,7 @@ tf.app.flags.DEFINE_boolean('restore', False, 'whether to resotre from checkpoin
 tf.app.flags.DEFINE_integer('save_checkpoint_steps', 1000, '')
 tf.app.flags.DEFINE_integer('save_summary_steps', 100, '')
 tf.app.flags.DEFINE_string('pretrained_model_path', None, '')
+tf.app.flags.DEFINE_boolean('augment', True, 'whether to augment data')
 
 import model
 import icdar
@@ -97,6 +98,8 @@ def main(argv=None):
     input_score_maps_split = tf.split(input_score_maps, len(gpus))
     input_geo_maps_split = tf.split(input_geo_maps, len(gpus))
     input_training_masks_split = tf.split(input_training_masks, len(gpus))
+    
+    augmentor = icdar.augmentor() if FLAGS.augment else None
 
     tower_grads = []
     reuse_variables = None
@@ -146,7 +149,8 @@ def main(argv=None):
 
         data_generator = icdar.get_batch(num_workers=FLAGS.num_readers,
                                          input_size=FLAGS.input_size,
-                                         batch_size=FLAGS.batch_size_per_gpu * len(gpus))
+                                         batch_size=FLAGS.batch_size_per_gpu * len(gpus),
+                                         augmentor=augmentor)
 
         start = time.time()
         for step in range(FLAGS.max_steps):

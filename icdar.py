@@ -5,6 +5,8 @@ import cv2
 import time
 import os
 import numpy as np
+import imgaug as ia
+import imgaug.augmenters as iaa
 import scipy.optimize
 import matplotlib.pyplot as plt
 import matplotlib.patches as Patches
@@ -580,11 +582,55 @@ def generate_rbox(im_size, polys, tags):
             geo_map[y, x, 4] = rotate_angle
     return score_map, geo_map, training_mask
 
+def augmentor():
+    sometimes = lambda aug: iaa.Sometimes(0.5, aug)
+
+    return iaa.Sequential(
+        [
+        
+            iaa.SomeOf((0, 3),
+                [
+                    iaa.OneOf([
+                        iaa.GaussianBlur((0, 1.0)),
+                        iaa.AverageBlur(k=(1, 3)),
+                        iaa.MedianBlur(k=(1, 3)),
+                    ]),
+                    iaa.Sharpen(alpha=(0, 1.0), lightness=(0.75, 1.5)),
+                    sometimes(iaa.OneOf([
+                        iaa.EdgeDetect(alpha=(0, 0.25)),
+                        iaa.DirectedEdgeDetect(
+                            alpha=(0, 0.5), direction=(0.0, 0.2)
+                        ),
+                    ])),
+                    iaa.AdditiveGaussianNoise(
+                        loc=0, scale=(0.0, 0.03*255), per_channel=0.5
+                    ),
+                    iaa.OneOf([
+                        iaa.Dropout((0.01, 0.1), per_channel=0.5),
+                        iaa.CoarseDropout(
+                            (0.03, 0.15), size_percent=(0.02, 0.05),
+                            per_channel=0.2
+                        ),
+                    ]),
+                    iaa.Add((-10, 10), per_channel=0.5),
+                    iaa.Multiply((0.7, 1.2), per_channel=0.5),
+                    iaa.LinearContrast((0.5, 2.0), per_channel=0.5),
+                    #sometimes(iaa.JpegCompression(compression=(70, 99)))
+                ],
+                # do all of the above augmentations in random order
+                random_order=True
+            )
+        ],
+        # do all of the above augmentations in random order
+        random_order=True
+    )
+
 
 def generator(input_size=512, batch_size=32,
               background_ratio=3./8,
               random_scale=np.array([0.5, 1, 2.0, 3.0]),
-              vis=False):
+              vis=False,
+              augmentor=None):
     image_list = np.array(get_images())
     print('{} training images in {}'.format(
         image_list.shape[0], FLAGS.training_data_path))
@@ -708,6 +754,8 @@ def generator(input_size=512, batch_size=32,
                 training_masks.append(training_mask[::4, ::4, np.newaxis].astype(np.float32))
 
                 if len(images) == batch_size:
+                    if augmentor is not None:
+                        images = augmentor(images=images)
                     yield images, image_fns, score_maps, geo_maps, training_masks
                     images = []
                     image_fns = []
