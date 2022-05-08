@@ -1,53 +1,43 @@
 # Detection of seven segment fonts on electricity meeter display
 
 ### Introduction
-This is a fine tuned tensorflow model to detect seven segment text, using [EAST text detection](https://github.com/argman/EAST)
-The features are summarized blow:
+This is a fine tuned tensorflow model to detect seven segment text on meeter images, using [EAST text detection](https://github.com/argman/EAST)
 
-### Contents
-- [](#)
-    - [Introduction](#introduction)
-    - [Contents](#contents)
-    - [Installation](#installation)
-    - [Download](#download)
-    - [Train](#train)
-    - [Demo](#demo)
-    - [Test](#test)
-    - [Examples](#examples)
-    - [Troubleshooting](#troubleshooting)
-
-### Installation
-1. Any version of tensorflow version > 1.0 should be ok.
-
-### Download
-1. Models trained on ICDAR 2013 (training set) + ICDAR 2015 (training set): [BaiduYun link](http://pan.baidu.com/s/1jHWDrYQ) [GoogleDrive](https://drive.google.com/open?id=0B3APw5BZJ67ETHNPaU9xUkVoV0U)
-2. Resnet V1 50 provided by tensorflow slim: [slim resnet v1 50](http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz)
-
-### Train
-If you want to train the model, you should provide the dataset path, in the dataset path, a separate gt text file should be provided for each image
-and run
-
+### Setup
+Open a terminal and run to clone this repo locally
 ```
-python multigpu_train.py --gpu_list=0 --input_size=512 --batch_size_per_gpu=14 --checkpoint_path=/tmp/east_icdar2015_resnet_v1_50_rbox/ \
---text_scale=512 --training_data_path=/data/ocr/icdar2015/ --geometry=RBOX --learning_rate=0.0001 --num_readers=24 \
---pretrained_model_path=/tmp/resnet_v1_50.ckpt
+git clone https://github.com/renjithsasidharan/east-meeter-reading-detection
+
+cd east-meeter-reading-detection
 ```
 
-If you have more than one gpu, you can pass gpu ids to gpu_list(like --gpu_list=0,1,2,3)
+### How to create annotations
+Annotations are present in `data/meeter_annotations` folder. If you want to create more annotations, you can add new images to `data/meeter_annotations` folder and use `labelme` to annotate.
 
-**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
-See the examples in training_samples/**
+  1. Copy new images to `data/meeter_annotations` folder
+  2. Install `labelme` from https://github.com/wkentaro/labelme
+  3. Open `labelme`  on folder `data/meeter_annotations`
+  4. Select newly added image
+  5. Annotate polygons around the reading text. Start from top-left, top-right, bottom-right, bottom-left in that order for polygons.
+  6. ![image_1](training_samples/annotations.jpg)
+  7. Add the label as `meeter-reading`
+  8. Save annotation
 
-### Demo
-If you've downloaded the pre-trained model, you can setup a demo server by
-```
-python3 run_demo_server.py --checkpoint-path /tmp/east_icdar2015_resnet_v1_50_rbox/
-```
-Then open http://localhost:8769 for the web demo. Notice that the URL will change after you submitted an image.
-Something like `?r=49647854-7ac2-11e7-8bb7-80000210fe80` appends and that makes the URL persistent.
-As long as you are not deleting data in `static/results`, you can share your results to your friends using
-the same URL.
+### How to create training data from annotations.
+  1. In terminal run 
+     ```
+     python create_training_data_meeter.py
+     ``` 
+     This will create training data in `data/training_data` folder.
 
+### How to run training on Google Colab
+  1. Create archive from `training_data` folder and name it as `training_data.zip`
+  2. Go to https://colab.research.google.com/
+  3. Upload the notebook, `east_training.ipynb` from this repo to Colab
+  4. Upload `training_data.zip` file to google Colab files. Wait for the file to be uploaded, the transfer rate is low on Colab
+  5. Select GPU runtime
+  6. Run the notebook.
+  7. When the ntoebook finish running, it will download the trained model `east_det_fp16.tflite` to your machine.
 
 ### Test
 run
